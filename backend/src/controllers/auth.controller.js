@@ -1,8 +1,7 @@
 import User from "../models/user.model.js";
-import cloudinary from "../lib/cloudinary.js";
 import { AppError } from "../lib/appError.js";
 import { asyncHandler } from "../lib/asyncHandler.js";
-import { generateToken } from "../lib/utils.js";
+import { generateToken, streamUpload } from "../lib/utils.js";
 
 export const signup = asyncHandler(async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -57,19 +56,16 @@ export const logout = asyncHandler(async (req, res) => {
 });
 
 export const updateProfile = asyncHandler(async (req, res) => {
-  const { profilePic } = req.body;
   const userId = req.user._id;
 
-  if (!profilePic) throw new AppError(400, "Profile pic is required");
+  if (!req.file) throw new AppError(400, "Profile pic is required");
 
-  const uploadResponse = await cloudinary.uploader.upload(profilePic, {
-    folder: "realtime-chat/profile",
-  });
+  const imageUrl = await streamUpload(req.file.buffer, "realtime-chat/profile");
 
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     {
-      profilePic: uploadResponse.secure_url,
+      profilePic: imageUrl,
     },
     { new: true }
   );

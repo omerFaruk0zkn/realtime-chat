@@ -8,14 +8,17 @@ const MessageInput = () => {
   const { sendMessage } = useChatStore();
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
 
-    if (!file.type.startsWith("image/")) {
+    if (!file || !file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
     }
+
+    setImageFile(file);
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -27,6 +30,7 @@ const MessageInput = () => {
 
   const removeImage = () => {
     setImagePreview(null);
+    setImageFile(null);
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -34,19 +38,17 @@ const MessageInput = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
 
-    if (!text.trim() && !imagePreview) return;
+    if (!text.trim() && !imageFile) return;
 
     try {
       await sendMessage({
         text: text.trim(),
-        image: imagePreview,
+        imageFile,
       });
 
       // Clear form
       setText("");
-      setImagePreview(null);
-
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      removeImage();
     } catch (error) {
       console.log("Failed to send message", error);
     }

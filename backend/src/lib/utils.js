@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import streamifier from "streamifier";
+import cloudinary from "./cloudinary.js";
 
 export const generateToken = (userId, res) => {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -13,4 +15,17 @@ export const generateToken = (userId, res) => {
   });
 
   return token;
+};
+
+export const streamUpload = (fileBuffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder },
+      (error, result) => {
+        if (result) resolve(result.secure_url);
+        else reject(error);
+      }
+    );
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
 };

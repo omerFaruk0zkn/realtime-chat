@@ -1,8 +1,8 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
-import cloudinary from "../lib/cloudinary.js";
 import { asyncHandler } from "../lib/asyncHandler.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { streamUpload } from "../lib/utils.js";
 
 export const getUsersForSidebar = asyncHandler(async (req, res) => {
   const loggedInUserId = req.user._id;
@@ -26,17 +26,14 @@ export const getMessages = asyncHandler(async (req, res) => {
 });
 
 export const sendMessage = asyncHandler(async (req, res) => {
-  const { text, image } = req.body;
+  const { text } = req.body;
   const { id: receiverId } = req.params;
   const senderId = req.user._id;
 
   let imageUrl;
 
-  if (image) {
-    const uploadResponse = await cloudinary.uploader.upload(image, {
-      folder: "realtime-chat/images",
-    });
-    imageUrl = uploadResponse.secure_url;
+  if (req.file) {
+    imageUrl = await streamUpload(req.file.buffer, "realtime-chat/images");
   }
 
   const newMessage = new Message({

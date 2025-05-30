@@ -21,8 +21,10 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
+    "multer": "^2.0.0",
     "realtime-chat": "file:..",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

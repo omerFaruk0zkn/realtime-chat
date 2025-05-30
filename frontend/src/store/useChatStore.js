@@ -36,13 +36,22 @@ export const useChatStore = create((set, get) => ({
     }
   },
 
-  sendMessage: async (messageData) => {
+  sendMessage: async ({ text, imageFile }) => {
     const { selectedUser, messages } = get();
+    const formData = new FormData();
+
+    formData.append("text", text);
+    if (imageFile) formData.append("image", imageFile);
 
     try {
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
-        messageData
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
       set({ messages: [...messages, res.data] });
     } catch (error) {
